@@ -4,7 +4,7 @@ import AppHeader from '../AppHeader.vue'
 
 describe('AppHeader', () => {
   it('renders hello world', () => {
-    expect('hello world').toBe('hello world')
+    expect('Hello world').toBe('Hello world')
   })
 
   it('mounts the component', () => {
