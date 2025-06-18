@@ -11,6 +11,8 @@ export default mergeConfig(
       exclude: [...configDefaults.exclude, 'e2e/**'],
       coverage: {
         provider: 'istanbul',
+        reportsDirectory: './tests/unit/coverage',
+        reporter: ['text', 'json', 'html'],
       },
       root: fileURLToPath(new URL('./', import.meta.url)),
     },
