@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Show current branch name
+branch=$(git rev-parse --abbrev-ref HEAD)
+echo "----------------------------------------"
+echo "🔎 Checking branch: $branch"
+echo "----------------------------------------"
+
+# Check commit message length (last commit in staging)
+commit_msg=$(cat "$(git rev-parse --git-dir)/COMMIT_EDITMSG" 2>/dev/null)
+if [ -z "$commit_msg" ]; then
+  commit_msg=$(git log -1 --pretty=%B)
+fi
+
+if [ ${#commit_msg} -lt 3 ]; then
+  echo "❌ Commit message must be at least 3 characters!"
+  exit 1
+else
+  echo "✅ Commit message length OK"
+fi
+
+echo "----------------------------------------"
+echo "🎨 Running code formatter (npm run format)..."
+echo "----------------------------------------"
+if ! npm run format; then
+  echo "❌ Formatting failed!"
+  exit 1
+else
+  echo "✅ Formatting passed"
+fi
+
+echo "----------------------------------------"
+echo "🧪 Running unit tests (npm run test:unit)..."
+echo "----------------------------------------"
+if ! npm run test:unit; then
+  echo "❌ Unit tests failed!"
+  exit 1
+else
+  echo "✅ Unit tests passed"
+fi
+
+echo "----------------------------------------"
+echo "🧹 Running linter (npm run lint)..."
+echo "----------------------------------------"
+if ! npm run lint; then
+  echo "❌ Linting failed!"
+  exit 1
+else
+  echo "✅ Linting passed"
+fi
+
+echo "----------------------------------------"
+echo "🚀 All checks passed!"
+echo "----------------------------------------"
