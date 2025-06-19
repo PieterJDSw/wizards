@@ -7,6 +7,7 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { definePreset } from '@primeuix/themes'
+import Vue3Lottie from 'vue3-lottie'
 
 import App from './App.vue'
 import router from './router'
@@ -41,5 +42,6 @@ app.use(PrimeVue, {
   },
 })
 app.use(VueQueryPlugin)
+app.use(Vue3Lottie)
 
 app.mount('#app')

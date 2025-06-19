@@ -7,6 +7,8 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 
+import { fetchHouses } from '../api/houses'
+
 interface House {
   id: string
   name: string
@@ -17,46 +19,6 @@ interface House {
 }
 
 const wizardingStore = useWizardingWorldStore()
-
-const houses = ref<House[]>([
-  {
-    id: '1',
-    name: 'Gryffindor',
-    founder: 'Godric Gryffindor',
-    house_points: 482,
-    mascot: 'Lion',
-    houseColors: ['Scarlet', 'Gold'],
-  },
-  {
-    id: '2',
-    name: 'Hufflepuff',
-    founder: 'Helga Hufflepuff',
-    house_points: 352,
-    mascot: 'Badger',
-    houseColors: ['Yellow', 'Black'],
-  },
-  {
-    id: '3',
-    name: 'Ravenclaw',
-    founder: 'Rowena Ravenclaw',
-    house_points: 426,
-    mascot: 'Eagle',
-    houseColors: ['Blue', 'Bronze'],
-  },
-  {
-    id: '4',
-    name: 'Slytherin',
-    founder: 'Salazar Slytherin',
-    house_points: 472,
-    mascot: 'Serpent',
-    houseColors: ['Green', 'Silver'],
-  },
-])
-
-const fetchHouses = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  return houses.value
-}
 
 const { data, isLoading, error } = useQuery({
   queryKey: ['houses'],
@@ -71,7 +33,7 @@ const tableData = reactive({
 const lastSelectedHouse = ref<string | null>(null)
 
 function updateHousePoints(houseId: string, points: number) {
-  const house = houses.value.find((h) => h.id === houseId)
+  const house = data.value.find((h) => h.id === houseId)
   if (house) {
     house.house_points = points
   }
@@ -87,7 +49,7 @@ watch(
   () => wizardingStore.selectedHouse,
   (newHouse) => {
     if (newHouse) {
-      tableData.selectedHouse = houses.value.find((h) => h.id === newHouse.id) || null
+      tableData.selectedHouse = data.value.find((h) => h.id === newHouse.id) || null
     }
   },
 )
@@ -95,7 +57,7 @@ watch(
 onMounted(() => {
   document.title = 'Hogwarts Houses'
   if (wizardingStore.data) {
-    houses.value = [...wizardingStore.data]
+    data.value = [...wizardingStore.data]
   }
 })
 

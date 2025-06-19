@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, reactive, computed, onMounted } from 'vue'
+import { fetchHouses } from '../api/houses'
 
 export const useWizardingWorldStore = defineStore('wizardingWorld', {
   state: () => {
