@@ -8,21 +8,14 @@ import Button from 'primevue/button'
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 
 import { fetchHouses } from '../api/houses'
-
-interface House {
-  id: string
-  name: string
-  founder: string
-  house_points: number
-  mascot?: string
-  houseColors?: string[]
-}
+import type { House } from '@/types/houses'
 
 const wizardingStore = useWizardingWorldStore()
 
 const { data, isLoading, error } = useQuery({
   queryKey: ['houses'],
   queryFn: fetchHouses,
+  staleTime: 1000 * 60 * 10, // 10 minutes
 })
 
 const tableData = reactive({
@@ -45,25 +38,13 @@ function selectHouse(house: House) {
   lastSelectedHouse.value = house.name
 }
 
-watch(
-  () => wizardingStore.selectedHouse,
-  (newHouse) => {
-    if (newHouse) {
-      tableData.selectedHouse = data.value.find((h) => h.id === newHouse.id) || null
-    }
-  },
-)
-
 onMounted(() => {
-  document.title = 'Hogwarts Houses'
   if (wizardingStore.data) {
     data.value = [...wizardingStore.data]
   }
 })
 
-onUnmounted(() => {
-  // No need to clear the timer as it's not used
-})
+onUnmounted(() => {})
 </script>
 
 <template>

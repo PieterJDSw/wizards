@@ -10,17 +10,12 @@ import Tag from 'primevue/tag'
 import Panel from 'primevue/panel'
 import Divider from 'primevue/divider'
 import { fetchElixirs } from '@/api/elixirs'
+import type { Elixir } from '@/types/elixir'
 
-interface Elixir {
-  id: string
-  name: string
-  effect: string
-  difficulty: string
-  ingredients?: string[]
-}
 const { data, isLoading, error } = useQuery({
   queryKey: ['elixirs'],
   queryFn: fetchElixirs,
+  staleTime: 1000 * 60 * 10, // 10 minutes
 })
 const selectedElixir = ref<Elixir | null>(null)
 
@@ -29,17 +24,7 @@ const globalFilters = reactive({
   difficultyFilter: '',
 })
 
-onMounted(() => {
-  document.title = 'Magical Elixirs'
-  setTimeout(() => {
-    data.value.push({
-      id: '6',
-      name: 'Draught of Living Death',
-      effect: 'Causes deep sleep',
-      difficulty: 'Advanced',
-    })
-  }, 2000)
-})
+onMounted(() => {})
 
 const filteredElixirs = computed(() => {
   const difficulty = globalFilters.difficultyFilter ?? ''
@@ -86,13 +71,13 @@ function deleteElixir(id: string) {
         </div>
       </template>
       <template #content>
-        <div class="p-fluid p-formgrid p-grid mb-4">
-          <div class="p-field p-col-12 p-md-6">
-            <label for="name-filter">Filter by name</label>
+        <div class="sm:columns-1 gap-0 mb-4 lg:columns-4">
+          <div>
+            <label for="name-filter " class="mr-2">Filter by name</label>
             <InputText id="name-filter" v-model="globalFilters.nameFilter" />
           </div>
-          <div class="p-field p-col-12 p-md-6">
-            <label for="difficulty-filter">Filter by difficulty</label>
+          <div>
+            <label for="difficulty-filter" class="mr-2">Filter by difficulty</label>
             <Dropdown
               id="difficulty-filter"
               v-model="globalFilters.difficultyFilter"

@@ -20,7 +20,7 @@ function toggleDarkMode() {
 
 <template>
   <div class="app-container">
-    <header style="display: flex; align-items: center; justify-content: space-between">
+    <header style="align-items: center" class="mb-4">
       <Menubar :model="items">
         <template #item="{ item }">
           <router-link
@@ -35,10 +35,12 @@ function toggleDarkMode() {
             </a>
           </router-link>
         </template>
+        <template #end>
+          <Button @click="toggleDarkMode" class="ml-4">
+            {{ isDark ? 'Light Mode' : 'Dark Mode' }}
+          </Button>
+        </template>
       </Menubar>
-      <Button @click="toggleDarkMode" class="ml-4">
-        {{ isDark ? 'Light Mode' : 'Dark Mode' }}
-      </Button>
     </header>
     <main>
       <RouterView />

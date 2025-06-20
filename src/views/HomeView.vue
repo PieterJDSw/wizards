@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import {
   useRouter,
   type RouteLocationAsPathGeneric,
@@ -40,9 +40,11 @@ const menuCards = ref([
 ])
 
 const navigateTo = (
-  route: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric,
+  route?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric,
 ) => {
-  router.push(route)
+  if (route) {
+    router.push(route)
+  }
 }
 
 onMounted(() => {
