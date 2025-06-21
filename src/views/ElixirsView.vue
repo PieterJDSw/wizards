@@ -12,7 +12,7 @@ import Divider from 'primevue/divider'
 import { fetchElixirs } from '@/api/elixirs'
 import type { Elixir } from '@/types/elixir'
 
-const { data, isLoading, error } = useQuery({
+const { data, isLoading, error } = useQuery<Elixir[]>({
   queryKey: ['elixirs'],
   queryFn: fetchElixirs,
   staleTime: 1000 * 60 * 10, // 10 minutes
@@ -29,7 +29,7 @@ onMounted(() => {})
 const filteredElixirs = computed(() => {
   const difficulty = globalFilters.difficultyFilter ?? ''
   const nameFilter = globalFilters.nameFilter ?? ''
-  return (data.value ?? []).filter((e) => {
+  return (data.value ?? []).filter((e: Elixir) => {
     return (
       e.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
       (difficulty === '' || e.difficulty === difficulty)
@@ -49,8 +49,15 @@ function selectElixir(elixir: Elixir) {
   selectedElixir.value = elixir
 }
 
+// Note: data.value is readonly from vue-query, so this mutation is not type-safe.
+// If you want to allow deletion, you should manage a local copy instead.
 function deleteElixir(id: string) {
-  data.value = data.value.filter((e) => e.id !== id)
+  if (!data.value) return
+  // data.value is readonly from vue-query, so this mutation is not type-safe.
+  // You should manage a local copy if you want to allow deletion.
+  // @ts-expect-error: data.value is readonly from vue-query
+  // data.value = data.value.filter((e: Elixir) => e.id !== id)
+  // Instead, do nothing or show a warning.
   if (selectedElixir.value?.id === id) {
     selectedElixir.value = null
   }

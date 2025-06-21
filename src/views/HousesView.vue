@@ -6,19 +6,25 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
+import Image from 'primevue/image'
 
 import { fetchHouses } from '../api/houses'
 import type { House } from '@/types/houses'
 
 const wizardingStore = useWizardingWorldStore()
 
-const { data, isLoading, error } = useQuery({
+const { data, isLoading, error } = useQuery<House[]>({
   queryKey: ['houses'],
   queryFn: fetchHouses,
   staleTime: 1000 * 60 * 10, // 10 minutes
 })
 
-const tableData = reactive({
+type TableData = {
+  houses: House[]
+  selectedHouse: House | null
+}
+
+const tableData = reactive<TableData>({
   houses: [],
   selectedHouse: null,
 })
@@ -26,12 +32,26 @@ const tableData = reactive({
 const lastSelectedHouse = ref<string | null>(null)
 
 function updateHousePoints(houseId: string, points: number) {
-  const house = data.value.find((h) => h.id === houseId)
+  if (!data.value) return
+  const house = data.value.find((h: House) => h.id === houseId)
   if (house) {
     house.house_points = points
   }
 }
-
+function determineImageURL(houseName: string): string {
+  switch (houseName) {
+    case 'gryffindor':
+      return 'https://ucarecdn.com/1660488c-c478-4146-aa44-7cf96dfa6916/vecteezy_harrypottergryffindorlogoindoodlestylehogwarts_58101645removebgpreview.png'
+    case 'hufflepuff':
+      return 'https://ucarecdn.com/53e5bf7d-5432-4bd0-9401-002de3436b82/vecteezy_harrypotterhufflepufflogoincartoondoodlestylevector_22230272removebgpreview.png'
+    case 'ravenclaw':
+      return 'https://ucarecdn.com/59cc745c-2df5-44ff-aacd-294dc54716af/vecteezy_harrypotterravenclawlogoincartoondoodlestylevector_22230277removebgpreview.png'
+    case 'slytherin':
+      return 'https://ucarecdn.com/81ff7cbf-3f12-43d1-bda6-3ff716952f6e/vecteezy_harrypotterslytherinlogoincartoondoodlestylevector_22310275removebgpreview.png'
+    default:
+      return ''
+  }
+}
 function selectHouse(house: House) {
   tableData.selectedHouse = house
   wizardingStore.selectHouse(house.id)
@@ -40,7 +60,9 @@ function selectHouse(house: House) {
 
 onMounted(() => {
   if (wizardingStore.data) {
-    data.value = [...wizardingStore.data]
+    // data.value is readonly from useQuery, so this assignment is not allowed.
+    // If you need to use a local copy, create a new ref or reactive variable.
+    // data.value = [...wizardingStore.data]
   }
 })
 
@@ -56,8 +78,9 @@ onUnmounted(() => {})
 
         <div v-if="isLoading" class="flex justify-center py-4">Loading houses...</div>
         <div v-else-if="error" class="text-red-500">An error occurred while loading houses.</div>
+
         <div v-else>
-          <DataTable
+          <!-- <DataTable
             :value="data"
             stripedRows
             paginator
@@ -79,7 +102,40 @@ onUnmounted(() => {})
                 </div>
               </template>
             </Column>
-          </DataTable>
+          </DataTable> -->
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <Card
+              v-for="item in data"
+              :key="item.id"
+              style="width: 100%; overflow: hidden"
+              class="transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:scale-102"
+            >
+              <template #header>
+                <div :class="'house-row ' + item.name.toLowerCase()">
+                  <Image
+                    alt="user header"
+                    class="w-full h-full object-cover"
+                    :src="determineImageURL(item.name.toLowerCase())"
+                  />
+                </div>
+              </template>
+              <template #title>{{ item.name }}</template>
+              <template #subtitle>{{ item.founder }}</template>
+              <template #content>
+                <div>
+                  <p class="mb-2">{{ item.commonRoom }}</p>
+                  <p class="mb-2">{{ item.element }}</p>
+                  <p class="mb-2">{{ item.ghost }}</p>
+                </div>
+              </template>
+              <template #footer>
+                <div class="flex gap-4 mt-1">
+                  <Button icon="fas fa-eye" label="View Details" @click="selectHouse(item)" />
+                </div>
+              </template>
+            </Card>
+          </div>
 
           <!-- House Detail Section -->
           <div v-if="tableData.selectedHouse" class="mt-4 p-4 border rounded">

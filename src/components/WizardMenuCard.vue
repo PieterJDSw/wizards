@@ -23,7 +23,8 @@ function handleNavigate() {
 
 <template>
   <Card
-    class="w-full max-w-md cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col"
+    style="width: 100%; min overflow: hidden"
+    class="w-full max-w-md cursor-pointer min-h-full shadow-lg hover:shadow-xl transition-all flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:scale-102"
     @click="handleNavigate"
   >
     <template #header>
@@ -40,7 +41,9 @@ function handleNavigate() {
       <div class="text-xl sm:text-2xl font-bold px-1">{{ title }}</div>
     </template>
     <template #content>
-      <p class="mb-4 flex-grow px-1">{{ description }}</p>
+      <div class="min-h-[30px] px-2 py-4">
+        <div>{{ description }}</div>
+      </div>
     </template>
     <template #footer>
       <div class="flex justify-end pt-2">

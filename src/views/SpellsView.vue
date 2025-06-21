@@ -68,6 +68,10 @@ const filters = ref({
   name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   effect: { value: null, matchMode: FilterMatchMode.CONTAINS },
 })
+function handleError(err) {
+  console.error(err)
+  errorMessage.value = err.message
+}
 
 function safelyUpdateLastViewedSpell(spellName) {
   if (wizardingStore.tracker?.lastViewedSpell !== undefined) {
@@ -105,7 +109,6 @@ watch(
           dataKey="id"
           filterDisplay="row"
           :globalFilterFields="['name', 'effect', 'type']"
-          :filters="filters"
         >
           <template #header>
             <div class="flex justify-end">

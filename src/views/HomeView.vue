@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import {
-  useRouter,
-  type RouteLocationAsPathGeneric,
-  type RouteLocationAsRelativeGeneric,
-} from 'vue-router'
+import type { Ref } from 'vue'
+import { useRouter, type RouteLocationAsPath, type RouteLocationAsRelative } from 'vue-router'
 
 import HuffPuff from '@/assets/lottie/huffpuf.json'
 import LottieAnimation from '@/components/LottieAnimation.vue'
@@ -12,7 +9,16 @@ import WizardMenuCard from '@/components/WizardMenuCard.vue'
 
 const router = useRouter()
 
-const menuCards = ref([
+type MenuCard = {
+  title: string
+  description: string
+  icon: string
+  route: string
+  color: string
+  visible: boolean
+}
+
+const menuCards: Ref<MenuCard[]> = ref([
   {
     title: 'Houses',
     description: 'Explore the different houses of the wizarding world.',
@@ -39,9 +45,7 @@ const menuCards = ref([
   },
 ])
 
-const navigateTo = (
-  route?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric,
-) => {
+const navigateTo = (route?: string | RouteLocationAsRelative | RouteLocationAsPath) => {
   if (route) {
     router.push(route)
   }
@@ -60,7 +64,7 @@ onMounted(() => {
 
 watch(
   menuCards,
-  (newVal, oldVal) => {
+  (newVal: MenuCard[], oldVal: MenuCard[]) => {
     console.log('Cards changed', newVal, oldVal)
     for (let i = 0; i < newVal.length; i++) {
       if (newVal[i].visible !== oldVal[i].visible) {
@@ -86,14 +90,9 @@ watch(
       </div>
 
       <div
-        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 justify-items-center"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 justify-items-center items-stretch"
       >
-        <div
-          v-for="(card, index) in menuCards"
-          :key="index"
-          class="card-container w-full flex justify-center"
-          :class="{ 'card-visible': card.visible }"
-        >
+        <div v-for="(card, index) in menuCards" :key="index">
           <WizardMenuCard
             :title="card.title"
             :description="card.description"
@@ -101,6 +100,7 @@ watch(
             :color="card.color"
             :route="card.route"
             @navigate="navigateTo"
+            :key="index"
           />
         </div>
       </div>
