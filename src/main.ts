@@ -9,6 +9,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import { definePreset } from '@primeuix/themes'
 import Vue3Lottie from 'vue3-lottie'
 import { clerkPlugin } from '@clerk/vue'
+import * as Sentry from '@sentry/vue'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!PUBLISHABLE_KEY) {
@@ -50,4 +51,24 @@ app.use(PrimeVue, {
 app.use(VueQueryPlugin)
 app.use(Vue3Lottie)
 app.use(clerkPlugin, { publishableKey: PUBLISHABLE_KEY })
+Sentry.init({
+  app,
+  dsn: 'https://305d0821a27a930fa04b7db2738e14e3@o4509539012968448.ingest.de.sentry.io/4509539014475856',
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true,
+  // This enables automatic instrumentation (highly recommended),
+  // but is not necessary for purely manual usage
+  // If you only want to use custom instrumentation:
+  // * Remove the BrowserTracing integration
+  // * add Sentry.addTracingExtensions() above your Sentry.init() call
+  integrations: [Sentry.browserTracingIntegration()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+  _experiments: { enableLogs: true },
+  // Set tracePropagationTargets to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: ['localhost', /^https:\/\/gorgeous-gaufre-50e360\.netlify\.app\//],
+})
 app.mount('#app')
