@@ -10,15 +10,8 @@ export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
   const selectedSpell = ref(null)
   const loading = reactive({ value: false })
 
-  // Example data for houses and spells
-  const data = reactive([
-    // { id: '1', name: 'Gryffindor', house_points: 0 },
-    // ... other houses
-  ])
-  const spells = ref([
-    // { id: '1', name: 'Expelliarmus', effect: 'Disarming', type: 'Charm' },
-    // ... other spells
-  ])
+  const data = reactive([])
+  const spells = ref([])
 
   onMounted(() => {
     setTimeout(() => {

@@ -8,6 +8,12 @@ import Aura from '@primeuix/themes/aura'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { definePreset } from '@primeuix/themes'
 import Vue3Lottie from 'vue3-lottie'
+import { clerkPlugin } from '@clerk/vue'
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Add your Clerk Publishable Key to the .env file')
+}
 
 import App from './App.vue'
 import router from './router'
@@ -43,5 +49,5 @@ app.use(PrimeVue, {
 })
 app.use(VueQueryPlugin)
 app.use(Vue3Lottie)
-
+app.use(clerkPlugin, { publishableKey: PUBLISHABLE_KEY })
 app.mount('#app')

@@ -1,21 +1,38 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import Menubar from 'primevue/menubar'
 import Button from 'primevue/button'
-
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/vue'
+import { useUser } from '@clerk/vue'
+import { useUserStore } from './stores/userStore'
 const items = ref([
   { label: 'Home', icon: 'pi pi-home', to: '/' },
   { label: 'Houses', icon: 'pi pi-building', to: '/houses' },
   { label: 'Spells', icon: 'pi pi-bolt', to: '/spells' },
   { label: 'Elixirs', icon: 'pi pi-turkish-lira', to: '/elixirs' },
 ])
-const isDark = ref(false)
+const { user } = useUser()
+const userStore = useUserStore()
 
+watch(
+  user,
+  (newUser) => {
+    if (newUser) {
+      userStore.setUser(newUser)
+    } else {
+      userStore.clearUser()
+    }
+  },
+  { immediate: true },
+)
+
+const isDark = ref(false)
 function toggleDarkMode() {
   isDark.value = !isDark.value
   document.documentElement.classList.toggle('app-dark', isDark.value)
 }
+onMounted(() => {})
 </script>
 
 <template>
@@ -39,6 +56,12 @@ function toggleDarkMode() {
           <Button @click="toggleDarkMode" class="ml-4">
             {{ isDark ? 'Light Mode' : 'Dark Mode' }}
           </Button>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </template>
       </Menubar>
     </header>
@@ -61,3 +84,5 @@ body {
   background: var(--surface-ground, #474749);
 }
 </style>
+
+publicMetadata.role
