@@ -11,3 +11,8 @@ export async function fetchHouseById(id: string) {
   logger.info(`Fetched house with ID ${id}:`, res.data)
   return res.data
 }
+export async function fetchHousePeople(id: string) {
+  const res = await axios.get(`https://hp-api.onrender.com/api/characters/house/${id}`)
+  logger.info(`Fetched house characters with ID ${id}:`, res.data)
+  return res.data
+}

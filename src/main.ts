@@ -11,6 +11,8 @@ import Vue3Lottie from 'vue3-lottie'
 import { clerkPlugin } from '@clerk/vue'
 import * as Sentry from '@sentry/vue'
 
+import AnimateOnScroll from 'primevue/animateonscroll'
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!PUBLISHABLE_KEY) {
   throw new Error('Add your Clerk Publishable Key to the .env file')
@@ -37,7 +39,7 @@ const wizardingPreset = definePreset(Aura, {
 })
 
 const app = createApp(App)
-
+app.directive('animateonscroll', AnimateOnScroll)
 app.use(createPinia())
 app.use(router)
 app.use(PrimeVue, {
@@ -51,6 +53,7 @@ app.use(PrimeVue, {
 app.use(VueQueryPlugin)
 app.use(Vue3Lottie)
 app.use(clerkPlugin, { publishableKey: PUBLISHABLE_KEY })
+
 Sentry.init({
   app,
   dsn: 'https://305d0821a27a930fa04b7db2738e14e3@o4509539012968448.ingest.de.sentry.io/4509539014475856',

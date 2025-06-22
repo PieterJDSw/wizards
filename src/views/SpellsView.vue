@@ -1,55 +1,39 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import ScrollPanel from 'primevue/scrollpanel'
 import Card from 'primevue/card'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import Loading from '@/assets/lottie/loading.json'
+import LottieAnimation from '@/components/LottieAnimation.vue'
+
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 import { useRouter } from 'vue-router'
-import { FilterMatchMode } from '@primevue/core/api'
-import { fetchSpells } from '@/api/spells'
 
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
+import { fetchSpells } from '@/api/spells'
+import AdminSpells from '@/components/AdminSpells.vue'
 
 const router = useRouter()
 
 const wizardingStore = useWizardingWorldStore()
-
-const filterText = ''
-
-const filteredSpells = computed(() => {
-  return data.value.filter((spell) => {
-    return (
-      spell.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      spell.effect.toLowerCase().includes(filterText.toLowerCase()) ||
-      spell.type.toLowerCase().includes(filterText.toLowerCase())
-    )
-  })
-})
-
-function addSpell(name, effect, type) {
-  const newId = (parseInt(data.value[data.value.length - 1].id) + 1).toString()
-  data.value.push({ id: newId, name, effect, type })
-  // wizardingStore.addSpell(name, effect, type)
-}
-
+const filterText = ref('')
 const { data, isLoading, error } = useQuery({
   queryKey: ['spells'],
   queryFn: fetchSpells,
   staleTime: 1000 * 60 * 10, // 10 minutes
 })
 
-const loading = ref(true)
-const errorMessage = ref('')
-
-const timer = setTimeout(() => {
-  loading.value = false
-}, 1000)
-
 const visitCount = ref(0)
+const filteredSpells = computed(() => {
+  if (!data.value) return []
+  const spells = [...data.value] // shallow copy
+  if (!filterText.value) return spells
+  return spells.filter(
+    (spell) =>
+      spell.name.toLowerCase().includes(filterText.value.toLowerCase()) ||
+      spell.effect.toLowerCase().includes(filterText.value.toLowerCase()) ||
+      spell.type.toLowerCase().includes(filterText.value.toLowerCase()),
+  )
+})
 
 onMounted(() => {
   if (wizardingStore.tracker?.visitCount !== undefined) {
@@ -58,26 +42,6 @@ onMounted(() => {
     visitCount.value++
   }
 })
-
-const tableData = reactive({
-  spells: [],
-  selectedSpell: null,
-})
-const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  effect: { value: null, matchMode: FilterMatchMode.CONTAINS },
-})
-function handleError(err) {
-  console.error(err)
-  errorMessage.value = err.message
-}
-
-function safelyUpdateLastViewedSpell(spellName) {
-  if (wizardingStore.tracker?.lastViewedSpell !== undefined) {
-    wizardingStore.tracker.lastViewedSpell = spellName
-  }
-}
 
 watch(
   () => wizardingStore.spells,
@@ -98,94 +62,48 @@ watch(
         <p class="mb-4">Discover various spells from the wizarding world.</p>
 
         <div class="mb-4 flex gap-2"></div>
+        <div v-if="isLoading" class="flex justify-center py-4">
+          Loading Spells...
+          <LottieAnimation :animationData="Loading" :height="350" :width="350" />
+        </div>
 
-        <DataTable
-          :value="data ? data : wizardingStore.spells?.value || data"
-          stripedRows
-          paginator
-          :rows="10"
-          tableStyle="min-width: 50rem"
-          v-model:selection="tableData.selectedSpell"
-          dataKey="id"
-          filterDisplay="row"
-          :globalFilterFields="['name', 'effect', 'type']"
-        >
-          <template #header>
-            <div class="flex justify-end">
-              <Button
-                label="Add Random Spell"
-                @click="addSpell('Random Spell', 'Does something random', 'Curse')"
-                @click.prevent="console.log('Added random spell')"
-                class="mr-3"
-              />
-              <IconField>
-                <InputIcon class="pi pi-search"> </InputIcon>
-                <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-              </IconField>
+        <div v-else-if="error" class="text-red-500">An error occurred while loading spells.</div>
+
+        <div v-else>
+          <!-- <AdminSpells :spells="data" /> -->
+
+          <div class="mb-4 flex gap-2">
+            <input
+              v-model="filterText"
+              type="text"
+              placeholder="Filter spells..."
+              class="p-2 border rounded w-full"
+            />
+          </div>
+          <ScrollPanel style="width: 100%; height: 70vh">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              <Card
+                v-for="spell in filteredSpells"
+                :key="spell.id"
+                class="max-w-80 min-w-64 mb-4 flex flex-col"
+              >
+                <template #title>
+                  {{ spell.name }}
+                </template>
+                <template #content>
+                  <p><strong>Effect:</strong> {{ spell.effect }}</p>
+                  <p><strong>Type:</strong> {{ spell.type }}</p>
+                </template>
+              </Card>
             </div>
-          </template>
-          <template #empty> No customers found. </template>
-          <Column field="name" header="Name" sortable></Column>
-          <Column field="effect" header="Effect" sortable></Column>
-          <Column field="type" header="Type" sortable></Column>
-          <Column>
-            <template #body="slotProps">
-              <div>
-                <Button
-                  icon="fas fa-eye"
-                  label="View Details"
-                  @click="
-                    () => {
-                      tableData.selectedSpell = slotProps.data
-                      safelyUpdateLastViewedSpell(slotProps.data.name)
-                      console.log(slotProps.data.name + ' selected!')
-                    }
-                  "
-                />
-                <Button
-                  icon="fas fa-external-link-alt"
-                  label="Open Details Page"
-                  class="ml-2"
-                  @click="router.push(`/spells/${slotProps.data.id}`)"
-                />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-
-        <div
-          v-if="tableData.selectedSpell || wizardingStore.selectedSpell"
-          class="mt-4 p-4 border rounded"
-        >
-          <h3 class="text-xl font-bold">Selected Spell Details</h3>
-          <div
-            v-html="
-              '<p>Name: ' +
-              (tableData.selectedSpell?.name || wizardingStore.selectedSpell?.name) +
-              '</p>'
-            "
-          ></div>
-          <div
-            v-html="
-              '<p>Effect: ' +
-              (tableData.selectedSpell?.effect || wizardingStore.selectedSpell?.effect) +
-              '</p>'
-            "
-          ></div>
-          <div
-            v-html="
-              '<p>Type: ' +
-              (tableData.selectedSpell?.type || wizardingStore.selectedSpell?.type) +
-              '</p>'
-            "
-          ></div>
+          </ScrollPanel>
         </div>
       </template>
     </Card>
 
     <div id="spell-stats">
-      Total spells: {{ data.length }} (Store: {{ wizardingStore.spells?.value?.length || 0 }})
-      <span>Visit count: {{ wizardingStore.tracker?.visitCount || visitCount }}</span>
+      Total spells: {{ data?.length }} (Store: {{ wizardingStore?.spells?.value?.length || 0 }})
+      <span>Visit count: {{ wizardingStore?.tracker?.visitCount || visitCount }}</span>
     </div>
   </div>
 </template>

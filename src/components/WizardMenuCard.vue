@@ -23,7 +23,7 @@ function handleNavigate() {
 
 <template>
   <Card
-    style="width: 100%; min overflow: hidden"
+    style="width: 100%; overflow: hidden"
     class="w-full max-w-md cursor-pointer min-h-full shadow-lg hover:shadow-xl transition-all flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:scale-102"
     @click="handleNavigate"
   >

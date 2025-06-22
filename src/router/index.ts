@@ -56,7 +56,7 @@ router.beforeEach((to, from, next) => {
     return
   }
   if (to.meta.requiredRole && userStore.role !== to.meta.requiredRole) {
-    next('/') // or show forbidden
+    next('/')
     return
   }
   next()

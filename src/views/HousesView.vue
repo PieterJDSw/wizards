@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, onUnmounted } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
+import { ref, reactive, onMounted, watch, onUnmounted, computed, type Ref } from 'vue'
+
 import Card from 'primevue/card'
+
+import ScrollPanel from 'primevue/scrollpanel'
+
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 import Image from 'primevue/image'
+import Loading from '@/assets/lottie/loading.json'
+import LottieAnimation from '@/components/LottieAnimation.vue'
 
-import { fetchHouses } from '../api/houses'
 import type { House } from '@/types/houses'
 
 const wizardingStore = useWizardingWorldStore()
-
-const { data, isLoading, error } = useQuery<House[]>({
-  queryKey: ['houses'],
-  queryFn: fetchHouses,
-  staleTime: 1000 * 60 * 10, // 10 minutes
-})
 
 type TableData = {
   houses: House[]
   selectedHouse: House | null
 }
-
+const houses: Ref<Array<House> | null> = computed(() => wizardingStore.houses || [])
+const isLoading = computed(() => wizardingStore.isLoading)
+const error = computed(() => wizardingStore.error)
 const tableData = reactive<TableData>({
   houses: [],
   selectedHouse: null,
@@ -32,11 +32,16 @@ const tableData = reactive<TableData>({
 const lastSelectedHouse = ref<string | null>(null)
 
 function updateHousePoints(houseId: string, points: number) {
-  if (!data.value) return
-  const house = data.value.find((h: House) => h.id === houseId)
+  if (!houses.value) return
+  const house = houses.value.find((h) => (h as House).id === houseId) as House | undefined
   if (house) {
-    house.house_points = points
+    if ('house_points' in house) {
+      house.house_points += points
+    } else {
+      house.house_points = points
+    }
   }
+  console.log(`Updated house points for ${houseId}: ${house?.house_points}`)
 }
 function determineImageURL(houseName: string): string {
   switch (houseName) {
@@ -54,16 +59,12 @@ function determineImageURL(houseName: string): string {
 }
 function selectHouse(house: House) {
   tableData.selectedHouse = house
-  wizardingStore.selectHouse(house.id)
+  wizardingStore.selectHouse(house)
   lastSelectedHouse.value = house.name
 }
 
-onMounted(() => {
-  if (wizardingStore.data) {
-    // data.value is readonly from useQuery, so this assignment is not allowed.
-    // If you need to use a local copy, create a new ref or reactive variable.
-    // data.value = [...wizardingStore.data]
-  }
+onMounted(async () => {
+  wizardingStore.fetchAndSetHouses()
 })
 
 onUnmounted(() => {})
@@ -76,37 +77,17 @@ onUnmounted(() => {})
       <template #content>
         <p class="mb-4">Explore the different houses of the wizarding world.</p>
 
-        <div v-if="isLoading" class="flex justify-center py-4">Loading houses...</div>
+        <div v-if="isLoading" class="flex justify-center py-4">
+          Loading houses...
+          <LottieAnimation :animationData="Loading" :height="350" :width="350" />
+        </div>
+
         <div v-else-if="error" class="text-red-500">An error occurred while loading houses.</div>
 
         <div v-else>
-          <!-- <DataTable
-            :value="data"
-            stripedRows
-            paginator
-            :rows="10"
-            tableStyle="min-width: 50rem"
-            v-model:selection="tableData.selectedHouse"
-          >
-            <Column field="name" header="Name" sortable></Column>
-            <Column field="founder" header="Founder" sortable></Column>
-            <Column field="house_points" header="House Points" sortable></Column>
-            <Column>
-              <template #body="slotProps">
-                <div :class="'house-row ' + slotProps.data.name.toLowerCase()">
-                  <Button
-                    icon="fas fa-eye"
-                    label="View Details"
-                    @click="selectHouse(slotProps.data)"
-                  />
-                </div>
-              </template>
-            </Column>
-          </DataTable> -->
-
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             <Card
-              v-for="item in data"
+              v-for="item in houses"
               :key="item.id"
               style="width: 100%; overflow: hidden"
               class="transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:scale-102"
@@ -159,14 +140,31 @@ onUnmounted(() => {})
             <div class="mt-4">
               <Button
                 label="Award 10 Points"
-                @click="
-                  updateHousePoints(
-                    tableData.selectedHouse.id,
-                    tableData.selectedHouse.house_points + 10,
-                  )
-                "
+                @click="updateHousePoints(tableData.selectedHouse.id, 10)"
               />
             </div>
+            <hr class="mt-2" />
+
+            <h3 class="text-xl font-bold mt-2 mb-2">Selected House Characters</h3>
+            <ScrollPanel style="width: 100%; height: 15rem">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <Card
+                  v-for="item in wizardingStore.characters"
+                  :key="item.id"
+                  style="width: 100%; overflow: hidden"
+                  class="transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:scale-102"
+                >
+                  <template #title>Name:{{ item.name }}</template>
+                  <template #subtitle>Species:{{ item.species }}</template>
+                  <template #content>
+                    <div>
+                      <p class="mb-2">Ancestry:{{ item.ancestry || 'Unknown' }}</p>
+                      <p class="mb-2">Gender:{{ item.gender }}</p>
+                    </div>
+                  </template>
+                </Card>
+              </div>
+            </ScrollPanel>
           </div>
         </div>
       </template>

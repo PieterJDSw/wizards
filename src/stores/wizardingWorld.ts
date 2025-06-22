@@ -1,3 +1,5 @@
+import { fetchHousePeople, fetchHouses } from '@/api/houses'
+import type { House } from '@/types/houses'
 import { defineStore } from 'pinia'
 import { ref, reactive, computed, onMounted } from 'vue'
 
@@ -6,30 +8,48 @@ export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
     visitCount: 0,
     lastViewedSpell: '',
   })
-
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
   const selectedSpell = ref(null)
   const loading = reactive({ value: false })
-
+  const selectedHouse = ref<House | null>(null)
+  const characters = ref(Array<House>)
+  const houses = ref<Array<House> | null>([])
+  const loadingCharacters = ref(false)
   const data = reactive([])
   const spells = ref([])
 
-  onMounted(() => {
-    setTimeout(() => {
-      console.log('Store initialization completed')
-    }, 2000)
-  })
-
-  function focusSpellSearch() {
-    document.getElementById('spell-search')?.focus()
-  }
-
-  function selectHouse(houseId: string) {
-    const house = data.find((h) => h.id === houseId)
-    if (house) {
-      this.selectedHouse = house
-      document.title = `Selected: ${house.name}`
-      alert(`Selected house: ${house.name}`)
+  async function fetchAndSetHouses() {
+    isLoading.value = true
+    error.value = null
+    try {
+      houses.value = await fetchHouses()
+      console.log('Houses fetched:', houses.value)
+    } catch (e: any) {
+      error.value = e?.message || 'Failed to fetch houses'
+      houses.value = []
+    } finally {
+      isLoading.value = false
     }
+  }
+  onMounted(async () => {
+    console.log('Store initialization completed')
+
+    // setTimeout(() => {
+    //   console.log('Store initialization completed')
+    // }, 2000)
+  })
+  async function selectHouse(house: House) {
+    selectedHouse.value = house
+    loadingCharacters.value = true
+    try {
+      const chars = await fetchHousePeople(house.name)
+      characters.value = chars
+    } catch (e) {
+      characters.value = []
+    }
+    loadingCharacters.value = false
+    document.title = `Selected: ${house.name}`
   }
 
   function getHouseById(id: string) {
@@ -67,11 +87,16 @@ export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
     loading,
     data,
     spells,
-    focusSpellSearch,
+    selectedHouse,
+    characters,
+    houses,
+    isLoading,
+    error,
     selectHouse,
     getHouseById,
     updateHousePoints,
     addSpell,
     filterSpells,
+    fetchAndSetHouses,
   }
 })

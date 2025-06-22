@@ -11,6 +11,7 @@ const items = ref([
   { label: 'Houses', icon: 'pi pi-building', to: '/houses' },
   { label: 'Spells', icon: 'pi pi-bolt', to: '/spells' },
   { label: 'Elixirs', icon: 'pi pi-turkish-lira', to: '/elixirs' },
+  // { label: 'Ingredients', icon: 'pi pi-turkish-lira', to: '/elixirs' },
 ])
 const { user } = useUser()
 const userStore = useUserStore()
@@ -53,15 +54,59 @@ onMounted(() => {})
           </router-link>
         </template>
         <template #end>
-          <Button @click="toggleDarkMode" class="ml-4">
-            {{ isDark ? 'Light Mode' : 'Dark Mode' }}
-          </Button>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <div class="flex space-x-2 align-items-center justify-content-center">
+            <Button @click="toggleDarkMode" class="ml-4">
+              {{ isDark ? 'Light Mode' : 'Dark Mode' }}
+            </Button>
+            <SignedOut>
+              <SignInButton
+                :appearance="{
+                  elements: {
+                    img: {
+                      width: '100%',
+                      height: '100%',
+                    },
+                    span: {
+                      width: '100%',
+                      height: '100%',
+                    },
+                    Button: {
+                      fontSize: '14px',
+                      textTransform: 'none',
+                      backgroundColor: '#611BBD',
+                      '&:hover, &:focus, &:active': {
+                        backgroundColor: '#49247A',
+                      },
+                    },
+                  },
+                }"
+              />
+            </SignedOut>
+            <SignedIn>
+              <UserButton
+                :appearance="{
+                  elements: {
+                    img: {
+                      width: '100%',
+                      height: '100%',
+                    },
+                    span: {
+                      width: '100%',
+                      height: '100%',
+                    },
+                    Button: {
+                      fontSize: '14px',
+                      textTransform: 'none',
+                      backgroundColor: '#611BBD',
+                      '&:hover, &:focus, &:active': {
+                        backgroundColor: '#49247A',
+                      },
+                    },
+                  },
+                }"
+              />
+            </SignedIn>
+          </div>
         </template>
       </Menubar>
     </header>
