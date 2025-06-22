@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import ScrollPanel from 'primevue/scrollpanel'
 import Card from 'primevue/card'
@@ -7,12 +7,8 @@ import Loading from '@/assets/lottie/loading.json'
 import LottieAnimation from '@/components/LottieAnimation.vue'
 
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
-import { useRouter } from 'vue-router'
 
 import { fetchSpells } from '@/api/spells'
-import AdminSpells from '@/components/AdminSpells.vue'
-
-const router = useRouter()
 
 const wizardingStore = useWizardingWorldStore()
 const filterText = ref('')

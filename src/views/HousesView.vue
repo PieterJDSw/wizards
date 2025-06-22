@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, onUnmounted, computed, type Ref } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, type Ref } from 'vue'
 
 import Card from 'primevue/card'
 
 import ScrollPanel from 'primevue/scrollpanel'
 
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import Button from 'primevue/button'
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 import Image from 'primevue/image'

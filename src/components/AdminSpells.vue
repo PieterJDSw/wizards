@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { Spell } from '@/types/spells'
 
-import { ref, computed, onMounted, reactive, watch } from 'vue'
+import { ref, reactive } from 'vue'
 
-import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'

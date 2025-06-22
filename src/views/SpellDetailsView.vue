@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, computed, onUnmounted } from 'vue'
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 import Card from 'primevue/card'
@@ -22,8 +22,6 @@ const router = useRouter()
 const wizardingStore = useWizardingWorldStore()
 
 const spellId = route.params.id as string
-
-let currentSpellName = null
 
 const spellDetails = ref<SpellDetail | null>(null)
 const loading = ref(true)

@@ -1,7 +1,7 @@
 import { fetchHousePeople, fetchHouses } from '@/api/houses'
 import type { House } from '@/types/houses'
 import { defineStore } from 'pinia'
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
   const tracker = reactive({
@@ -25,8 +25,12 @@ export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
     try {
       houses.value = await fetchHouses()
       console.log('Houses fetched:', houses.value)
-    } catch (e: any) {
-      error.value = e?.message || 'Failed to fetch houses'
+    } catch (e: unknown) {
+      if (e && typeof e === 'object' && 'message' in e) {
+        error.value = (e as { message?: string }).message || 'Failed to fetch houses'
+      } else {
+        error.value = 'Failed to fetch houses'
+      }
       houses.value = []
     } finally {
       isLoading.value = false
@@ -45,7 +49,7 @@ export const useWizardingWorldStore = defineStore('wizardingWorld', () => {
     try {
       const chars = await fetchHousePeople(house.name)
       characters.value = chars
-    } catch (e) {
+    } catch {
       characters.value = []
     }
     loadingCharacters.value = false
