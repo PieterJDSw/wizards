@@ -11,6 +11,7 @@ const items = ref([
   { label: 'Houses', icon: 'pi pi-building', to: '/houses' },
   { label: 'Spells', icon: 'pi pi-bolt', to: '/spells' },
   { label: 'Elixirs', icon: 'pi pi-turkish-lira', to: '/elixirs' },
+  { label: 'Trivia', icon: 'pi pi-sparkles', to: '/leaderboard' },
   // { label: 'Ingredients', icon: 'pi pi-turkish-lira', to: '/elixirs' },
 ])
 const { user } = useUser()

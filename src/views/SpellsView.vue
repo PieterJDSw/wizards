@@ -5,6 +5,8 @@ import ScrollPanel from 'primevue/scrollpanel'
 import Card from 'primevue/card'
 import Loading from '@/assets/lottie/loading.json'
 import LottieAnimation from '@/components/LottieAnimation.vue'
+import Button from 'primevue/button'
+import { useRouter } from 'vue-router'
 
 import { useWizardingWorldStore } from '../stores/wizardingWorld'
 
@@ -17,6 +19,8 @@ const { data, isLoading, error } = useQuery({
   queryFn: fetchSpells,
   staleTime: 1000 * 60 * 10, // 10 minutes
 })
+
+const router = useRouter()
 
 const visitCount = ref(0)
 const filteredSpells = computed(() => {
@@ -48,6 +52,14 @@ watch(
   },
   { immediate: true },
 )
+
+function goToSpellDetails(spellId: string) {
+  const spell = filteredSpells.value.find((s) => s.id === spellId)
+  if (spell) {
+    wizardingStore.selectSpell(spell)
+  }
+  router.push({ name: 'spell-details', params: { id: spellId } })
+}
 </script>
 
 <template>
@@ -56,18 +68,14 @@ watch(
       <template #title>Spells</template>
       <template #content>
         <p class="mb-4">Discover various spells from the wizarding world.</p>
-
         <div class="mb-4 flex gap-2"></div>
         <div v-if="isLoading" class="flex justify-center py-4">
           Loading Spells...
           <LottieAnimation :animationData="Loading" :height="350" :width="350" />
         </div>
-
         <div v-else-if="error" class="text-red-500">An error occurred while loading spells.</div>
-
         <div v-else>
           <!-- <AdminSpells :spells="data" /> -->
-
           <div class="mb-4 flex gap-2">
             <input
               v-model="filterText"
@@ -82,6 +90,12 @@ watch(
                 v-for="spell in filteredSpells"
                 :key="spell.id"
                 class="max-w-80 min-w-64 mb-4 flex flex-col"
+                :pt="{
+                  root: {
+                    class: spell.light ? `bg-[${spell.light.toLowerCase()}]/10` : 'bg-white',
+                  },
+                }"
+                :style="spell.light ? { backgroundColor: `${spell.light}1A` } : {}"
               >
                 <template #title>
                   {{ spell.name }}
@@ -89,6 +103,17 @@ watch(
                 <template #content>
                   <p><strong>Effect:</strong> {{ spell.effect }}</p>
                   <p><strong>Type:</strong> {{ spell.type }}</p>
+                  <p v-if="spell.light">
+                    <span class="inline-flex items-center">
+                      <span
+                        class="w-4 h-4 rounded-full mr-2 border"
+                        :style="{ backgroundColor: spell.light, borderColor: spell.light }"
+                        :title="spell.light"
+                      ></span>
+                      <span class="text-xs text-gray-600">Light: {{ spell.light }}</span>
+                    </span>
+                  </p>
+                  <Button label="View Details" class="mt-2" @click="goToSpellDetails(spell.id)" />
                 </template>
               </Card>
             </div>
@@ -96,7 +121,6 @@ watch(
         </div>
       </template>
     </Card>
-
     <div id="spell-stats">
       Total spells: {{ data?.length }} (Store: {{ wizardingStore?.spells?.value?.length || 0 }})
       <span>Visit count: {{ wizardingStore?.tracker?.visitCount || visitCount }}</span>

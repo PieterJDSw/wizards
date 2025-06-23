@@ -28,19 +28,18 @@ const routes = [
     path: '/elixirs',
     name: 'elixirs',
     component: () => import('../views/ElixirsView.vue'),
-    meta: { requiresAuth: true, requiredRole: 'admin' },
   },
   {
     path: '/auth',
     name: 'auth',
     component: () => import('../views/AuthView.vue'),
   },
-  // {
-  //   path: '/admin',
-  //   name: 'admin',
-  //   component: () => import('../views/AdminView.vue'),
-  //   meta: { requiresAuth: true, requiredRole: 'admin' },
-  // },
+  {
+    path: '/leaderboard',
+    name: 'admin',
+    component: () => import('../views/LeaderBoard.vue'),
+    meta: { requiresAuth: true, requiredRole: 'admin' },
+  },
 ]
 
 const router = createRouter({

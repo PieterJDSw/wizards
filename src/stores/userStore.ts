@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { UserResource } from '@clerk/types'
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref(null)
+  const user = ref<UserResource | null>(null)
   const role = ref(null)
   const isSignedIn = ref(false)
 
-  function setUser(newUser: any) {
+  function setUser(newUser: UserResource) {
     user.value = newUser
     role.value = newUser?.publicMetadata?.role || null
     isSignedIn.value = !!newUser

@@ -23,4 +23,5 @@ export interface House {
   house_points: number
   mascot?: string
   houseColors?: string[]
+  points: number
 }
